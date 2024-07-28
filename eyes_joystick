@@ -1,0 +1,48 @@
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+
+#define SERVO_MIN 150 // Min pulse length out of 4096
+#define SERVO_MAX 600 // Max pulse length out of 4096
+#define SERVO_CENTER ((SERVO_MIN + SERVO_MAX) / 2) // Center pulse length
+
+const int joystickXPin = A1;
+const int joystickYPin = A0;
+const int switchPin = 2;
+const int potPin = A2;
+const int servoChannelX = 0; // Channel for X-axis controlled servo
+const int servoChannelY = 1; // Channel for Y-axis controlled servo
+
+int switchState = 0;
+int servoPositionX = SERVO_CENTER;
+int servoPositionY = SERVO_CENTER;
+
+void setup() {
+  pwm.begin();
+  pwm.setPWMFreq(60);  // Analog servos run at ~60 Hz
+  pinMode(switchPin, INPUT_PULLUP);
+  
+  // Initialize servos to the center position
+  pwm.setPWM(servoChannelX, 0, SERVO_CENTER);
+  pwm.setPWM(servoChannelY, 0, SERVO_CENTER);
+}
+
+void loop() {
+  switchState = digitalRead(switchPin);
+  if (switchState == LOW) {
+    int joystickValueX = analogRead(joystickXPin);
+    int joystickValueY = analogRead(joystickYPin);
+    servoPositionX = map(joystickValueX, 0, 1023, SERVO_MIN, SERVO_MAX);
+    servoPositionY = map(joystickValueY, 0, 1023, SERVO_MIN, SERVO_MAX);
+    pwm.setPWM(servoChannelX, 0, servoPositionX);
+    pwm.setPWM(servoChannelY, 0, servoPositionY);
+  } else {
+    int potValue = analogRead(potPin);
+    servoPositionX = map(potValue, 0, 1023, SERVO_MIN, SERVO_MAX);
+    servoPositionY = SERVO_CENTER; // Keep Y-axis servo at center position
+    pwm.setPWM(servoChannelX, 0, servoPositionX);
+    pwm.setPWM(servoChannelY, 0, servoPositionY-10`0);
+  }
+  delay(15);
+}
