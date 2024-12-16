@@ -1,0 +1,15 @@
+import cv2
+
+# Open the camera
+cap = cv2.VideoCapture(0)  # 0 is the default camera
+
+if cap.isOpened():
+    # Get the resolution of the camera
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    print(f"Camera resolution: {width} x {height}")
+else:
+    print("Failed to open the camera.")
+
+# Release the camera
+cap.release()
